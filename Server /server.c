@@ -18,6 +18,7 @@
 
 #include "helper.h"           /*  our own helper functions  */
 
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -97,13 +98,14 @@ int main(int argc, char *argv[]) {
 	if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 ) {
 	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
 	    exit(EXIT_FAILURE);
-	}
+	} 
 
 
 	/*  Retrieve an input line from the connected socket
 	    then simply write it back to the same socket.     */
 
 	Readline(conn_s, buffer, MAX_LINE-1);
+
 	Writeline(conn_s, buffer, strlen(buffer));
 
 
