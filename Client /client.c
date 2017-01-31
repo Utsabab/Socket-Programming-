@@ -89,13 +89,19 @@ int main(int argc, char *argv[]) {
 
     /*  Get string to echo from user  */
 
-    printf("Enter the string to echo: ");
+    printf("Enter the command: ");
     fgets(buffer, MAX_LINE, stdin);
+    
+    int temp = strncmp(buffer, "s", 1);
+    if (temp == 0)
+        printf("Enter the string to capitalize:\n");
+
     
 
     /*  Send string to echo server, and retrieve response  */
 
     Writeline(conn_s, buffer, strlen(buffer));
+   
     Readline(conn_s, buffer, MAX_LINE-1);
 
 
