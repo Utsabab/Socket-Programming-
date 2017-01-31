@@ -35,6 +35,7 @@ int ParseCmdLine(int argc, char *argv[], char **szAddress, char **szPort);
 int main(int argc, char *argv[]) {
 
     int       conn_s;                /*  connection socket         */
+    int       nBytes;
     short int port;                  /*  port number               */
     struct    sockaddr_in servaddr;  /*  socket address structure  */
     char      buffer[MAX_LINE];      /*  character buffer          */
@@ -91,11 +92,26 @@ int main(int argc, char *argv[]) {
 
     printf("Enter the command: ");
     fgets(buffer, MAX_LINE, stdin);
+
+    //char name[100];
     
     int temp = strncmp(buffer, "s", 1);
     if (temp == 0)
-        printf("Enter the string to capitalize:\n");
+    {
+        printf("\nEnter the string to capitalize:\n");
+        fgets(buffer,MAX_LINE,stdin);
+        printf("\nYou typed: %s",buffer);
+       
 
+
+    //strcpy(name, )
+        nBytes = strlen(buffer) + 1;
+
+        send(conn_s,buffer,nBytes,0);
+
+        recv(conn_s,buffer,MAX_LINE,0);
+
+    }
     
 
     /*  Send string to echo server, and retrieve response  */
@@ -107,7 +123,7 @@ int main(int argc, char *argv[]) {
 
     /*  Output echoed string  */
 
-    printf("Echo response: %s\n", buffer);
+    //printf("Echo response: %s\n", buffer);
 
     return EXIT_SUCCESS;
 }
