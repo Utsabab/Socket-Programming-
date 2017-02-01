@@ -32,13 +32,16 @@
 
 int main(int argc, char *argv[]) {
     int       list_s;                /*  listening socket          */
-    int       nBytes;
+    //int       nBytes;
     int       i;
     int       conn_s;                /*  connection socket         */
     short int port;                  /*  port number               */
     struct    sockaddr_in servaddr;  /*  socket address structure  */
     char      buffer[MAX_LINE];      /*  character buffer          */
     char     *endptr;                /*  for strtol()              */
+    char      buffer_send[MAX_LINE];
+    char      capital_buffer[MAX_LINE];
+
 
 
     /*  Get port number from the command line, and
@@ -101,7 +104,8 @@ int main(int argc, char *argv[]) {
 	if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 ) {
 	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
 	    exit(EXIT_FAILURE);
-	} 
+	}
+    } 
 
    
 
@@ -109,14 +113,25 @@ int main(int argc, char *argv[]) {
 	/*  Retrieve an input line from the connected socket
 	    then simply write it back to the same socket.     */
 
-	Readline(conn_s, buffer, MAX_LINE-1);
+    while(1){
+
+	   Readline(conn_s, buffer_send, MAX_LINE-1);
 
 
-    for (i=0;i<strlen(buffer);i++){
-        buffer[i] = toupper(buffer[i]);
-    }
+     
+        int temp_1 = strncmp(buffer_send, "CAP", 3);
+        if (temp_1 == 0){
+            memcpy(capital_buffer, buffer_send + 4, strlen(buffer_send) - 6);
+            
+        
+            for (i=0;i<strlen(capital_buffer);i++){
+                capital_buffer[i] = toupper(capital_buffer[i]);
+            }
+            Writeline(conn_s, capital_buffer, strlen(capital_buffer));   
+        }
+    }    
 
-    
+
 
 
 /*
@@ -137,7 +152,7 @@ int main(int argc, char *argv[]) {
     }
 */   
 
- Writeline(conn_s, buffer, strlen(buffer));
+
 
 
 	/*  Close the connected socket  */
@@ -146,5 +161,5 @@ int main(int argc, char *argv[]) {
 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
 	    exit(EXIT_FAILURE);
 	}
-    }
+    
 }
