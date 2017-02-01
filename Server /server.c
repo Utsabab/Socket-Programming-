@@ -42,6 +42,10 @@ int main(int argc, char *argv[]) {
     char     *endptr;                /*  for strtol()              */
     char      buffer_send[MAX_LINE];
     char      capital_buffer[MAX_LINE];
+    char      file_buffer[MAX_LINE];
+    file      *final_file;
+    long      lSize;
+    size_t    result;
 
 
 
@@ -140,11 +144,42 @@ int main(int argc, char *argv[]) {
 
         }
 
-        //int temp_2 = strncmp(buffer_send, "FILE", 4);
-        //if (temp_2 == 0){
-           // memcpy(file_buffer, buffer_send + 5, strlen(buffer_send) - 7);
+        int temp_2 = strncmp(buffer_send, "FILE", 4);
+        if (temp_2 == 0){
+            memcpy(file_buffer, buffer + 5, strlen(buffer) - 7);
 
-        //}  
+            final_file = fopen(file_buffer, "rb");
+            if (final_file==NULL) {
+                fputs ("FIle error", stderr);
+                exit (1);
+            }
+
+            //obtain file size
+            fseek (final_file, 0, SEEK_END);
+            lSize = ftell (final_file);
+            rewind (final_file);
+
+            //allocate memory to contain the whole file
+            buffer = (char*) malloc (sizeof(char)*lSize);
+            if (buffer == NULL)
+            {
+                fputs ("Memory error", stderr);
+                exit (2);
+            }
+
+            //copy the file into the buffer
+            result = fread (buffer, 1, lSize, final_file);
+            if (result != lSize)
+            {
+                fputs ("Reading error", stderr);
+                exit (3);
+            }
+
+            fclose (final_file);
+            free (buffer);
+            write(conn_s, buffer, strlen(buffer));
+            return 0;
+        }  
 
 
 
@@ -176,6 +211,7 @@ int main(int argc, char *argv[]) {
 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
 	    exit(EXIT_FAILURE);
 	}
+
     }
     
 }
