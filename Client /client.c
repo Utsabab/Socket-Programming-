@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
     char     *endptr;                /*  for strtol()              */
     char      buffer_send[MAX_LINE];
     char      capital_buffer[MAX_LINE];
+    char      file_buffer[MAX_LINE];
+    FILE      *final_file;
 
     /*  Get command line arguments  */
 
@@ -91,50 +93,91 @@ int main(int argc, char *argv[]) {
 
 
     /*  Get string to echo from user  */
+   
 
-    printf("Enter the command: ");
-    fgets(buffer, MAX_LINE, stdin);
+    do{
 
-    
-    
-    int temp_1 = strncmp(buffer, "s", 1);
-    if (temp_1 == 0)
-    {
-        printf("\nEnter the string to capitalize:");
+        printf("Enter the command: ");
         fgets(buffer, MAX_LINE, stdin);
-
-        strcpy(buffer_send, "CAP\n");
-        strcat(buffer_send,buffer);
-        strcat(buffer_send,"\n");
         
 
-        printf("%s",buffer_send);
+         if (strlen(buffer) > 2)
+         {
+             break;
+         }
 
-        write(conn_s, buffer_send, strlen(buffer_send));
-        
-   
-   
-        read(conn_s, buffer_send, MAX_LINE-1);
-        printf("The string in Uppercase: %s\n",buffer_send);
+        int temp_1 = strncmp(buffer, "s", 1);
+        int temp_2 = strncmp(buffer, "t", 1);
+        int temp_3 = strncmp(buffer, "q", 1);
+
+        //printf("Buffer is %s and its length is %s and strncmp gives %d", buffer, strlen(buffer), strncmp(buffer, "s",1));
+        if (strlen(buffer) == 2 && temp_1 == 0)
+        {
+            printf("\nEnter the string to capitalize:");
+            fgets(buffer, MAX_LINE, stdin);
+
+            strcpy(buffer_send, "CAP\n");
+            strcat(buffer_send,buffer);
+            strcat(buffer_send,"\n");
+            
+
+            printf("%s",buffer_send);
+
+            write(conn_s, buffer_send, strlen(buffer_send));
+            
        
+       
+            read(conn_s, buffer_send, MAX_LINE-1);
+            
+            
+
+            printf("The string in Uppercase: %s\n",buffer_send);
+           
+            
+        }
         
-    }
-    
-    int temp_2 = strncmp(buffer, "t", 1);
-    if (temp_2 == 0)
-    {
-        printf("\nEnter the string to find the file:\n");
-        fgets(buffer,MAX_LINE,stdin);
+        
+        else if (temp_2 == 0)
+        {
+            printf("\nEnter the string to find the file:\n");
+            fgets(buffer,MAX_LINE,stdin);
 
-        strcpy(buffer_send, "FILE\n");
-        strcat(buffer_send,buffer);
-        strcat(buffer_send, "\n");
+            strcpy(buffer_send, "FILE\n");
+            strcat(buffer_send,buffer);
+            strcat(buffer_send, "\n");
 
 
-        printf("%s",buffer_send);
+            printf("%s",buffer_send);
 
-        write(conn_s, buffer_send, strlen(buffer_send));
-    } 
+            write(conn_s, buffer_send, strlen(buffer_send));
+            read(conn_s, buffer, MAX_LINE-1);
+            
+            if (strncmp(buffer_send + 2, "NOT FOUND", 9) == 0)
+            {
+                printf("%s", buffer_send + 2);
+            }
+
+            else
+            {
+                final_file = fopen(file_buffer, "wb");
+                printf("%s", "The content of the file from server can be found in the clientfile named:\n", file_buffer);
+                fclose(final_file);
+                free(file_buffer);
+            }
+        } 
+        
+        
+        else if (temp_3 == 0)
+        {
+            return EXIT_SUCCESS;
+        }
+
+        memset(buffer, 0, (sizeof buffer[0]) * MAX_LINE);
+        memset(buffer_send, 0, (sizeof buffer_send[0]) *MAX_LINE);
+
+    //printf("buffer is %s and length is %d ", buffer, strlen(buffer));
+
+    } while ((strlen(buffer) == 2) && (strncmp (buffer , "q", 1) != 0));
 
 
    
@@ -142,7 +185,12 @@ int main(int argc, char *argv[]) {
 
     
     
+    if  (close(conn_s) < 0) {
+        printf("%s", "Error calling close()\n");
+        exit(EXIT_FAILURE);
 
+
+    }
     /*  Send string to echo server, and retrieve response  */
 
 
