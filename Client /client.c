@@ -129,9 +129,11 @@ int main(int argc, char *argv[]) {
         strcpy(buffer_send, "FILE\n");
         strcat(buffer_send,buffer);
         strcat(buffer_send, "\n");
-        
+
 
         printf("%s",buffer_send);
+
+        write(conn_s, buffer_send, strlen(buffer_send));
     } 
 
 
@@ -153,22 +155,17 @@ int main(int argc, char *argv[]) {
 
 int ParseCmdLine(int argc, char *argv[], char **szAddress, char **szPort) {
 
-    int n = 1;
+    
 
-    while ( n < argc ) {
-	if ( !strncmp(argv[n], "-a", 2) || !strncmp(argv[n], "-A", 2) ) {
-	    *szAddress = argv[++n];
-	}
-	else if ( !strncmp(argv[n], "-p", 2) || !strncmp(argv[n], "-P", 2) ) {
-	    *szPort = argv[++n];
-	}
-	else if ( !strncmp(argv[n], "-h", 2) || !strncmp(argv[n], "-H", 2) ) {
-	    printf("Usage:\n\n");
-	    printf("    timeclnt -a (remote IP) -p (remote port)\n\n");
-	    exit(EXIT_SUCCESS);
-	}
-	++n;
-    }
+    
+	
+	    *szAddress = argv[1];
+	
+	
+	    *szPort = argv[2];
+	
+	
+	
 
     return 0;
 }
