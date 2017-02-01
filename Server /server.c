@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 
 /*  Global constants  */
@@ -105,7 +106,6 @@ int main(int argc, char *argv[]) {
 	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
 	    exit(EXIT_FAILURE);
 	}
-    } 
 
    
 
@@ -113,23 +113,38 @@ int main(int argc, char *argv[]) {
 	/*  Retrieve an input line from the connected socket
 	    then simply write it back to the same socket.     */
 
-    while(1){
+	   read(conn_s, buffer, MAX_LINE-1);
+       buffer[strlen(buffer)] = '\0';
 
-	   Readline(conn_s, buffer_send, MAX_LINE-1);
+
+       //printf("%s", buffer);
+
 
 
      
-        int temp_1 = strncmp(buffer_send, "CAP", 3);
+        int temp_1 = strncmp(buffer, "CAP", 3);
         if (temp_1 == 0){
-            memcpy(capital_buffer, buffer_send + 4, strlen(buffer_send) - 6);
+            memcpy(capital_buffer, buffer + 4, strlen(buffer) - 6);
+            //fprintf(stderr, "Real message: %s\n", capital_buffer);
             
         
             for (i=0;i<strlen(capital_buffer);i++){
-                capital_buffer[i] = toupper(capital_buffer[i]);
+              capital_buffer[i] = toupper(capital_buffer[i]);
             }
-            Writeline(conn_s, capital_buffer, strlen(capital_buffer));   
+
+            sprintf(buffer_send, "%d", strlen(capital_buffer));
+            strcat(buffer_send, "\n");
+            strcat(buffer_send, capital_buffer);
+
+            write(conn_s, buffer_send, strlen(buffer_send));   
+
         }
-    }    
+
+        //int temp_2 = strncmp(buffer_send, "FILE", 4);
+        //if (temp_2 == 0){
+           // memcpy(file_buffer, buffer_send + 5, strlen(buffer_send) - 7);
+
+        //}  
 
 
 
@@ -161,5 +176,6 @@ int main(int argc, char *argv[]) {
 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
 	    exit(EXIT_FAILURE);
 	}
+    }
     
 }

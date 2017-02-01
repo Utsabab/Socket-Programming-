@@ -58,12 +58,19 @@ ssize_t Readline(int sockd, void *vptr, size_t maxlen) {
     buffer = vptr;
 
     for ( n = 1; n < maxlen; n++ ) {
+
+	
 	
 	if ( (rc = read(sockd, &c, 1)) == 1 ) {
 	    *buffer++ = c;
 	    if ( c == '\n' )
 		break;
+
 	}
+
+	
+
+	
 	else if ( rc == 0 ) {
 	    if ( n == 1 )
 		return 0;
