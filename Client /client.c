@@ -100,18 +100,14 @@ int main(int argc, char *argv[]) {
     {
         printf("\nEnter the string to capitalize:\n");
         fgets(buffer,MAX_LINE,stdin);
-        printf("\nYou typed: %s",buffer);
+    }
        
 
 
     //strcpy(name, )
-        nBytes = strlen(buffer) + 1;
+    
 
-        send(conn_s,buffer,nBytes,0);
-
-        recv(conn_s,buffer,MAX_LINE,0);
-
-    }
+    
     
 
     /*  Send string to echo server, and retrieve response  */
@@ -123,7 +119,7 @@ int main(int argc, char *argv[]) {
 
     /*  Output echoed string  */
 
-    //printf("Echo response: %s\n", buffer);
+    printf("\nThe string in Uppercase: %s\n", buffer);
 
     return EXIT_SUCCESS;
 }
