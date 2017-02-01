@@ -42,6 +42,8 @@ int main(int argc, char *argv[]) {
     char     *szAddress; //(char*) malloc(4*sizeof(char));             /*  Holds remote IP address   */
     char     *szPort; // (char*) malloc(4*sizeof(char));                /*  Holds remote port         */
     char     *endptr;                /*  for strtol()              */
+    char      buffer_send[MAX_LINE];
+    char      capital_buffer[MAX_LINE];
 
     /*  Get command line arguments  */
 
@@ -93,18 +95,39 @@ int main(int argc, char *argv[]) {
     printf("Enter the command: ");
     fgets(buffer, MAX_LINE, stdin);
 
-    //char name[100];
     
-    int temp = strncmp(buffer, "s", 1);
-    if (temp == 0)
+    
+    int temp_1 = strncmp(buffer, "s", 1);
+    if (temp_1 == 0)
     {
-        printf("\nEnter the string to capitalize:\n");
+        printf("\nEnter the string to capitalize:");
         fgets(buffer,MAX_LINE,stdin);
-    }
+
+        strcpy(buffer_send, "CAP\n");
+        strcat(buffer_send,buffer);
+        strcat(buffer_send,"\n");
+
+        printf("%s",buffer_send);
+
+
+        Writeline(conn_s, buffer_send, strlen(buffer_send));
+   
+   
+        Readline(conn_s, capital_buffer, MAX_LINE-1);
+        printf("\nThe string in Uppercase: %s\n", capital_buffer);
        
+        
+    }
+    
+    int temp_2 = strncmp(buffer, "t", 1);
+    if (temp_2 == 0)
+    {
+        printf("\nEnter the string to find the file:\n");
+        fgets(buffer,MAX_LINE,stdin);
+    } 
 
 
-    //strcpy(name, )
+   
     
 
     
@@ -112,14 +135,9 @@ int main(int argc, char *argv[]) {
 
     /*  Send string to echo server, and retrieve response  */
 
-    Writeline(conn_s, buffer, strlen(buffer));
-   
-    Readline(conn_s, buffer, MAX_LINE-1);
-
 
     /*  Output echoed string  */
 
-    printf("\nThe string in Uppercase: %s\n", buffer);
 
     return EXIT_SUCCESS;
 }
