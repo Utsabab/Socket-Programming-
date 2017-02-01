@@ -1,0 +1,1554 @@
+commit 620d69cc5f565a9f5df568bfcfd5f4fb3baa7aab
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 14:25:23 2017 -0500
+
+    Server: Final code for the Server
+
+diff --git a/Server /server b/Server /server
+index a49f8fc..772f0ef 100755
+Binary files a/Server /server and b/Server /server differ
+diff --git a/Server /server.c b/Server /server.c
+index 4a23d4a..4013df6 100644
+--- a/Server /server.c	
++++ b/Server /server.c	
+@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
+     char      buffer_send[MAX_LINE];
+     char      capital_buffer[MAX_LINE];
+     char      file_buffer[MAX_LINE];
+-    file      *final_file;
++    FILE      *final_file;
+     long      lSize;
+     size_t    result;
+ 
+@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
+             rewind (final_file);
+ 
+             //allocate memory to contain the whole file
+-            buffer = (char*) malloc (sizeof(char)*lSize);
++            *buffer = (char*) malloc (sizeof(char)*lSize);
+             if (buffer == NULL)
+             {
+                 fputs ("Memory error", stderr);
+@@ -176,10 +176,37 @@ int main(int argc, char *argv[]) {
+             }
+ 
+             fclose (final_file);
++
++            sprintf(buffer_send, "%d", lSize);
++            strcat(buffer_send, "\n");
++            strcat(buffer_send, buffer);
++
++
++            
++            write(conn_s, buffer_send, lSize);
++
+             free (buffer);
+-            write(conn_s, buffer, strlen(buffer));
+-            return 0;
+-        }  
++        }
++        
++
++            else
++            {
++                strcpy (buffer, "NOT FOUND");
++                sprintf(buffer_send, "%d", strlen(buffer));
++                strcat(buffer_send, "\n");
++                strcat(buffer_send, buffer);
++                write(conn_s, buffer_send, strlen(buffer_send));
++            }
++
++            memset(buffer, 0, (sizeof buffer[0]) * MAX_LINE);
++            memset(buffer_send, 0, (sizeof buffer_send[0]) * MAX_LINE);
++            
++
++
++        }
++
++
++
+ 
+ 
+ 
+@@ -211,7 +238,7 @@ int main(int argc, char *argv[]) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
+ 	    exit(EXIT_FAILURE);
+ 	}
++}
+ 
+-    }
+-    
+-}
+\ No newline at end of file
++
++    
+\ No newline at end of file
+
+commit 909139bce274ceae7b4db10da042dd97d9a1d86c
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 14:24:46 2017 -0500
+
+    Client: Final code for the Client
+
+diff --git a/Client /client b/Client /client
+index e2b3878..5306422 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index 16d73b0..5f1315c 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
+     char     *endptr;                /*  for strtol()              */
+     char      buffer_send[MAX_LINE];
+     char      capital_buffer[MAX_LINE];
++    char      file_buffer[MAX_LINE];
++    FILE      *final_file;
+ 
+     /*  Get command line arguments  */
+ 
+@@ -91,50 +93,91 @@ int main(int argc, char *argv[]) {
+ 
+ 
+     /*  Get string to echo from user  */
++   
+ 
+-    printf("Enter the command: ");
+-    fgets(buffer, MAX_LINE, stdin);
++    do{
+ 
+-    
+-    
+-    int temp_1 = strncmp(buffer, "s", 1);
+-    if (temp_1 == 0)
+-    {
+-        printf("\nEnter the string to capitalize:");
++        printf("Enter the command: ");
+         fgets(buffer, MAX_LINE, stdin);
+-
+-        strcpy(buffer_send, "CAP\n");
+-        strcat(buffer_send,buffer);
+-        strcat(buffer_send,"\n");
+         
+ 
+-        printf("%s",buffer_send);
++         if (strlen(buffer) > 2)
++         {
++             break;
++         }
+ 
+-        write(conn_s, buffer_send, strlen(buffer_send));
+-        
+-   
+-   
+-        read(conn_s, buffer_send, MAX_LINE-1);
+-        printf("The string in Uppercase: %s\n",buffer_send);
++        int temp_1 = strncmp(buffer, "s", 1);
++        int temp_2 = strncmp(buffer, "t", 1);
++        int temp_3 = strncmp(buffer, "q", 1);
++
++        //printf("Buffer is %s and its length is %s and strncmp gives %d", buffer, strlen(buffer), strncmp(buffer, "s",1));
++        if (strlen(buffer) == 2 && temp_1 == 0)
++        {
++            printf("\nEnter the string to capitalize:");
++            fgets(buffer, MAX_LINE, stdin);
++
++            strcpy(buffer_send, "CAP\n");
++            strcat(buffer_send,buffer);
++            strcat(buffer_send,"\n");
++            
++
++            printf("%s",buffer_send);
++
++            write(conn_s, buffer_send, strlen(buffer_send));
++            
++       
+        
++            read(conn_s, buffer_send, MAX_LINE-1);
++            
++            
++
++            printf("The string in Uppercase: %s\n",buffer_send);
++           
++            
++        }
+         
+-    }
+-    
+-    int temp_2 = strncmp(buffer, "t", 1);
+-    if (temp_2 == 0)
+-    {
+-        printf("\nEnter the string to find the file:\n");
+-        fgets(buffer,MAX_LINE,stdin);
+-
+-        strcpy(buffer_send, "FILE\n");
+-        strcat(buffer_send,buffer);
+-        strcat(buffer_send, "\n");
++        
++        else if (temp_2 == 0)
++        {
++            printf("\nEnter the string to find the file:\n");
++            fgets(buffer,MAX_LINE,stdin);
++
++            strcpy(buffer_send, "FILE\n");
++            strcat(buffer_send,buffer);
++            strcat(buffer_send, "\n");
++
++
++            printf("%s",buffer_send);
++
++            write(conn_s, buffer_send, strlen(buffer_send));
++            read(conn_s, buffer, MAX_LINE-1);
++            
++            if (strncmp(buffer_send + 2, "NOT FOUND", 9) == 0)
++            {
++                printf("%s", buffer_send + 2);
++            }
++
++            else
++            {
++                final_file = fopen(file_buffer, "wb");
++                printf("%s", "The content of the file from server can be found in the clientfile named:\n", file_buffer);
++                fclose(final_file);
++                free(file_buffer);
++            }
++        } 
++        
++        
++        else if (temp_3 == 0)
++        {
++            return EXIT_SUCCESS;
++        }
+ 
++        memset(buffer, 0, (sizeof buffer[0]) * MAX_LINE);
++        memset(buffer_send, 0, (sizeof buffer_send[0]) *MAX_LINE);
+ 
+-        printf("%s",buffer_send);
++    //printf("buffer is %s and length is %d ", buffer, strlen(buffer));
+ 
+-        write(conn_s, buffer_send, strlen(buffer_send));
+-    } 
++    } while ((strlen(buffer) == 2) && (strncmp (buffer , "q", 1) != 0));
+ 
+ 
+    
+@@ -142,7 +185,12 @@ int main(int argc, char *argv[]) {
+ 
+     
+     
++    if  (close(conn_s) < 0) {
++        printf("%s", "Error calling close()\n");
++        exit(EXIT_FAILURE);
+ 
++
++    }
+     /*  Send string to echo server, and retrieve response  */
+ 
+ 
+diff --git "a/Client /\244[\220:\376\177" "b/Client /\244[\220:\376\177"
+new file mode 100644
+index 0000000..e69de29
+
+commit b68f43af296a48d76728ae70eec68f6545f5ae43
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 13:45:35 2017 -0500
+
+    Server: Server sends the content from the file
+
+diff --git a/Server /content b/Server /content
+new file mode 100644
+index 0000000..3070122
+--- /dev/null
++++ b/Server /content	
+@@ -0,0 +1,2 @@
++qwertyuiopasdfghjklzxcvbnm
++mnbvcxzasdfghjklpoiuytrewq
+\ No newline at end of file
+diff --git a/Server /server b/Server /server
+index 05ea959..a49f8fc 100755
+Binary files a/Server /server and b/Server /server differ
+diff --git a/Server /server.c b/Server /server.c
+index 3dc4584..4a23d4a 100644
+--- a/Server /server.c	
++++ b/Server /server.c	
+@@ -42,6 +42,10 @@ int main(int argc, char *argv[]) {
+     char     *endptr;                /*  for strtol()              */
+     char      buffer_send[MAX_LINE];
+     char      capital_buffer[MAX_LINE];
++    char      file_buffer[MAX_LINE];
++    file      *final_file;
++    long      lSize;
++    size_t    result;
+ 
+ 
+ 
+@@ -140,11 +144,42 @@ int main(int argc, char *argv[]) {
+ 
+         }
+ 
+-        //int temp_2 = strncmp(buffer_send, "FILE", 4);
+-        //if (temp_2 == 0){
+-           // memcpy(file_buffer, buffer_send + 5, strlen(buffer_send) - 7);
++        int temp_2 = strncmp(buffer_send, "FILE", 4);
++        if (temp_2 == 0){
++            memcpy(file_buffer, buffer + 5, strlen(buffer) - 7);
+ 
+-        //}  
++            final_file = fopen(file_buffer, "rb");
++            if (final_file==NULL) {
++                fputs ("FIle error", stderr);
++                exit (1);
++            }
++
++            //obtain file size
++            fseek (final_file, 0, SEEK_END);
++            lSize = ftell (final_file);
++            rewind (final_file);
++
++            //allocate memory to contain the whole file
++            buffer = (char*) malloc (sizeof(char)*lSize);
++            if (buffer == NULL)
++            {
++                fputs ("Memory error", stderr);
++                exit (2);
++            }
++
++            //copy the file into the buffer
++            result = fread (buffer, 1, lSize, final_file);
++            if (result != lSize)
++            {
++                fputs ("Reading error", stderr);
++                exit (3);
++            }
++
++            fclose (final_file);
++            free (buffer);
++            write(conn_s, buffer, strlen(buffer));
++            return 0;
++        }  
+ 
+ 
+ 
+@@ -176,6 +211,7 @@ int main(int argc, char *argv[]) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
+ 	    exit(EXIT_FAILURE);
+ 	}
++
+     }
+     
+ }
+\ No newline at end of file
+diff --git a/Server /server.png b/Server /server.png
+new file mode 100644
+index 0000000..f85e280
+Binary files /dev/null and b/Server /server.png differ
+
+commit 1f93a6624ed16d1b3976a73feccbf7b0aafffd95
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 07:26:14 2017 -0500
+
+    Client: Got rid of -a and -p
+
+diff --git a/Client /client b/Client /client
+index 9d7966a..e2b3878 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index dd49ec0..16d73b0 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -129,9 +129,11 @@ int main(int argc, char *argv[]) {
+         strcpy(buffer_send, "FILE\n");
+         strcat(buffer_send,buffer);
+         strcat(buffer_send, "\n");
+-        
++
+ 
+         printf("%s",buffer_send);
++
++        write(conn_s, buffer_send, strlen(buffer_send));
+     } 
+ 
+ 
+@@ -153,22 +155,17 @@ int main(int argc, char *argv[]) {
+ 
+ int ParseCmdLine(int argc, char *argv[], char **szAddress, char **szPort) {
+ 
+-    int n = 1;
+-
+-    while ( n < argc ) {
+-	if ( !strncmp(argv[n], "-a", 2) || !strncmp(argv[n], "-A", 2) ) {
+-	    *szAddress = argv[++n];
+-	}
+-	else if ( !strncmp(argv[n], "-p", 2) || !strncmp(argv[n], "-P", 2) ) {
+-	    *szPort = argv[++n];
+-	}
+-	else if ( !strncmp(argv[n], "-h", 2) || !strncmp(argv[n], "-H", 2) ) {
+-	    printf("Usage:\n\n");
+-	    printf("    timeclnt -a (remote IP) -p (remote port)\n\n");
+-	    exit(EXIT_SUCCESS);
+-	}
+-	++n;
+-    }
++    
++
++    
++	
++	    *szAddress = argv[1];
++	
++	
++	    *szPort = argv[2];
++	
++	
++	
+ 
+     return 0;
+ }
+
+commit 64f34f79806e5b530ffbc6b829daaa14afe42a8a
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 06:06:14 2017 -0500
+
+    Client: sends the string as CAPnxxxn and receives the ###nCCC
+
+diff --git a/Client /client b/Client /client
+index 0a9c7eb..9d7966a 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index 49ff5e7..dd49ec0 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -101,20 +101,21 @@ int main(int argc, char *argv[]) {
+     if (temp_1 == 0)
+     {
+         printf("\nEnter the string to capitalize:");
+-        fgets(buffer,MAX_LINE,stdin);
++        fgets(buffer, MAX_LINE, stdin);
+ 
+         strcpy(buffer_send, "CAP\n");
+         strcat(buffer_send,buffer);
+         strcat(buffer_send,"\n");
++        
+ 
+         printf("%s",buffer_send);
+ 
+-
+-        Writeline(conn_s, buffer_send, strlen(buffer_send));
++        write(conn_s, buffer_send, strlen(buffer_send));
++        
+    
+    
+-        Readline(conn_s, capital_buffer, MAX_LINE-1);
+-        printf("\nThe string in Uppercase: %s\n", capital_buffer);
++        read(conn_s, buffer_send, MAX_LINE-1);
++        printf("The string in Uppercase: %s\n",buffer_send);
+        
+         
+     }
+@@ -124,6 +125,13 @@ int main(int argc, char *argv[]) {
+     {
+         printf("\nEnter the string to find the file:\n");
+         fgets(buffer,MAX_LINE,stdin);
++
++        strcpy(buffer_send, "FILE\n");
++        strcat(buffer_send,buffer);
++        strcat(buffer_send, "\n");
++        
++
++        printf("%s",buffer_send);
+     } 
+ 
+ 
+
+commit d1feb2f96c9a86be3833ac816fbd0d9cde253831
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 06:04:48 2017 -0500
+
+    Server:splits the input and takes the string, capitalizes and concatenates with the length of string and sends to client
+
+diff --git a/Server /helper.h b/Server /helper.h
+index ba42ac6..35eda2d 100644
+--- a/Server /helper.h	
++++ b/Server /helper.h	
+@@ -58,12 +58,19 @@ ssize_t Readline(int sockd, void *vptr, size_t maxlen) {
+     buffer = vptr;
+ 
+     for ( n = 1; n < maxlen; n++ ) {
++
++	
+ 	
+ 	if ( (rc = read(sockd, &c, 1)) == 1 ) {
+ 	    *buffer++ = c;
+ 	    if ( c == '\n' )
+ 		break;
++
+ 	}
++
++	
++
++	
+ 	else if ( rc == 0 ) {
+ 	    if ( n == 1 )
+ 		return 0;
+@@ -113,4 +120,4 @@ ssize_t Writeline(int sockd, const void *vptr, size_t n) {
+ 
+ 
+ 
+-#endif  /*  PG_SOCK_HELP  */
+\ No newline at end of file
++#endif  /*  PG_SOCK_HELP  */
+diff --git a/Server /server b/Server /server
+index 42ea928..05ea959 100755
+Binary files a/Server /server and b/Server /server differ
+diff --git a/Server /server.c b/Server /server.c
+index d8b8722..3dc4584 100644
+--- a/Server /server.c	
++++ b/Server /server.c	
+@@ -22,6 +22,7 @@
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <ctype.h>
++#include <stdlib.h>
+ 
+ 
+ /*  Global constants  */
+@@ -105,7 +106,6 @@ int main(int argc, char *argv[]) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
+ 	    exit(EXIT_FAILURE);
+ 	}
+-    } 
+ 
+    
+ 
+@@ -113,23 +113,38 @@ int main(int argc, char *argv[]) {
+ 	/*  Retrieve an input line from the connected socket
+ 	    then simply write it back to the same socket.     */
+ 
+-    while(1){
++	   read(conn_s, buffer, MAX_LINE-1);
++       buffer[strlen(buffer)] = '\0';
++
++
++       //printf("%s", buffer);
+ 
+-	   Readline(conn_s, buffer_send, MAX_LINE-1);
+ 
+ 
+      
+-        int temp_1 = strncmp(buffer_send, "CAP", 3);
++        int temp_1 = strncmp(buffer, "CAP", 3);
+         if (temp_1 == 0){
+-            memcpy(capital_buffer, buffer_send + 4, strlen(buffer_send) - 6);
++            memcpy(capital_buffer, buffer + 4, strlen(buffer) - 6);
++            //fprintf(stderr, "Real message: %s\n", capital_buffer);
+             
+         
+             for (i=0;i<strlen(capital_buffer);i++){
+-                capital_buffer[i] = toupper(capital_buffer[i]);
++              capital_buffer[i] = toupper(capital_buffer[i]);
+             }
+-            Writeline(conn_s, capital_buffer, strlen(capital_buffer));   
++
++            sprintf(buffer_send, "%d", strlen(capital_buffer));
++            strcat(buffer_send, "\n");
++            strcat(buffer_send, capital_buffer);
++
++            write(conn_s, buffer_send, strlen(buffer_send));   
++
+         }
+-    }    
++
++        //int temp_2 = strncmp(buffer_send, "FILE", 4);
++        //if (temp_2 == 0){
++           // memcpy(file_buffer, buffer_send + 5, strlen(buffer_send) - 7);
++
++        //}  
+ 
+ 
+ 
+@@ -161,5 +176,6 @@ int main(int argc, char *argv[]) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
+ 	    exit(EXIT_FAILURE);
+ 	}
++    }
+     
+ }
+\ No newline at end of file
+
+commit 8ac9018cec14b2939c8c01c99eae16a91f13b2bf
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 01:59:48 2017 -0500
+
+    Server: SPlitting CAP\nxxx\n into string and capitalise
+
+diff --git a/Server /server b/Server /server
+index 814d9c7..42ea928 100755
+Binary files a/Server /server and b/Server /server differ
+diff --git a/Server /server.c b/Server /server.c
+index 52d3022..d8b8722 100644
+--- a/Server /server.c	
++++ b/Server /server.c	
+@@ -32,13 +32,16 @@
+ 
+ int main(int argc, char *argv[]) {
+     int       list_s;                /*  listening socket          */
+-    int       nBytes;
++    //int       nBytes;
+     int       i;
+     int       conn_s;                /*  connection socket         */
+     short int port;                  /*  port number               */
+     struct    sockaddr_in servaddr;  /*  socket address structure  */
+     char      buffer[MAX_LINE];      /*  character buffer          */
+     char     *endptr;                /*  for strtol()              */
++    char      buffer_send[MAX_LINE];
++    char      capital_buffer[MAX_LINE];
++
+ 
+ 
+     /*  Get port number from the command line, and
+@@ -101,7 +104,8 @@ int main(int argc, char *argv[]) {
+ 	if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 ) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
+ 	    exit(EXIT_FAILURE);
+-	} 
++	}
++    } 
+ 
+    
+ 
+@@ -109,14 +113,25 @@ int main(int argc, char *argv[]) {
+ 	/*  Retrieve an input line from the connected socket
+ 	    then simply write it back to the same socket.     */
+ 
+-	Readline(conn_s, buffer, MAX_LINE-1);
++    while(1){
+ 
++	   Readline(conn_s, buffer_send, MAX_LINE-1);
++
++
++     
++        int temp_1 = strncmp(buffer_send, "CAP", 3);
++        if (temp_1 == 0){
++            memcpy(capital_buffer, buffer_send + 4, strlen(buffer_send) - 6);
++            
++        
++            for (i=0;i<strlen(capital_buffer);i++){
++                capital_buffer[i] = toupper(capital_buffer[i]);
++            }
++            Writeline(conn_s, capital_buffer, strlen(capital_buffer));   
++        }
++    }    
+ 
+-    for (i=0;i<strlen(buffer);i++){
+-        buffer[i] = toupper(buffer[i]);
+-    }
+ 
+-    
+ 
+ 
+ /*
+@@ -137,7 +152,7 @@ int main(int argc, char *argv[]) {
+     }
+ */   
+ 
+- Writeline(conn_s, buffer, strlen(buffer));
++
+ 
+ 
+ 	/*  Close the connected socket  */
+@@ -146,5 +161,5 @@ int main(int argc, char *argv[]) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
+ 	    exit(EXIT_FAILURE);
+ 	}
+-    }
++    
+ }
+\ No newline at end of file
+
+commit e37d645045e2609d8572594aee287835c979608b
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Wed Feb 1 01:58:37 2017 -0500
+
+    Client: Adding CAP\nxxx\n to the string
+
+diff --git a/Client /client b/Client /client
+index 93d14ad..0a9c7eb 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index 7713565..49ff5e7 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -42,6 +42,8 @@ int main(int argc, char *argv[]) {
+     char     *szAddress; //(char*) malloc(4*sizeof(char));             /*  Holds remote IP address   */
+     char     *szPort; // (char*) malloc(4*sizeof(char));                /*  Holds remote port         */
+     char     *endptr;                /*  for strtol()              */
++    char      buffer_send[MAX_LINE];
++    char      capital_buffer[MAX_LINE];
+ 
+     /*  Get command line arguments  */
+ 
+@@ -93,18 +95,39 @@ int main(int argc, char *argv[]) {
+     printf("Enter the command: ");
+     fgets(buffer, MAX_LINE, stdin);
+ 
+-    //char name[100];
+     
+-    int temp = strncmp(buffer, "s", 1);
+-    if (temp == 0)
++    
++    int temp_1 = strncmp(buffer, "s", 1);
++    if (temp_1 == 0)
+     {
+-        printf("\nEnter the string to capitalize:\n");
++        printf("\nEnter the string to capitalize:");
+         fgets(buffer,MAX_LINE,stdin);
+-    }
++
++        strcpy(buffer_send, "CAP\n");
++        strcat(buffer_send,buffer);
++        strcat(buffer_send,"\n");
++
++        printf("%s",buffer_send);
++
++
++        Writeline(conn_s, buffer_send, strlen(buffer_send));
++   
++   
++        Readline(conn_s, capital_buffer, MAX_LINE-1);
++        printf("\nThe string in Uppercase: %s\n", capital_buffer);
+        
++        
++    }
++    
++    int temp_2 = strncmp(buffer, "t", 1);
++    if (temp_2 == 0)
++    {
++        printf("\nEnter the string to find the file:\n");
++        fgets(buffer,MAX_LINE,stdin);
++    } 
+ 
+ 
+-    //strcpy(name, )
++   
+     
+ 
+     
+@@ -112,14 +135,9 @@ int main(int argc, char *argv[]) {
+ 
+     /*  Send string to echo server, and retrieve response  */
+ 
+-    Writeline(conn_s, buffer, strlen(buffer));
+-   
+-    Readline(conn_s, buffer, MAX_LINE-1);
+-
+ 
+     /*  Output echoed string  */
+ 
+-    printf("\nThe string in Uppercase: %s\n", buffer);
+ 
+     return EXIT_SUCCESS;
+ }
+
+commit 62a406b7d5f184aa6352f4444c46033b8ee2ecbb
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Tue Jan 31 20:32:39 2017 -0500
+
+    Server: The server receives the string, capitalizes it and sends it back to client
+
+diff --git a/Server /server b/Server /server
+index 1fd8089..814d9c7 100755
+Binary files a/Server /server and b/Server /server differ
+diff --git a/Server /server.c b/Server /server.c
+index bea62e2..52d3022 100644
+--- a/Server /server.c	
++++ b/Server /server.c	
+@@ -21,6 +21,7 @@
+ 
+ #include <stdlib.h>
+ #include <stdio.h>
++#include <ctype.h>
+ 
+ 
+ /*  Global constants  */
+@@ -31,6 +32,8 @@
+ 
+ int main(int argc, char *argv[]) {
+     int       list_s;                /*  listening socket          */
++    int       nBytes;
++    int       i;
+     int       conn_s;                /*  connection socket         */
+     short int port;                  /*  port number               */
+     struct    sockaddr_in servaddr;  /*  socket address structure  */
+@@ -100,13 +103,41 @@ int main(int argc, char *argv[]) {
+ 	    exit(EXIT_FAILURE);
+ 	} 
+ 
++   
++
+ 
+ 	/*  Retrieve an input line from the connected socket
+ 	    then simply write it back to the same socket.     */
+ 
+ 	Readline(conn_s, buffer, MAX_LINE-1);
+ 
+-	Writeline(conn_s, buffer, strlen(buffer));
++
++    for (i=0;i<strlen(buffer);i++){
++        buffer[i] = toupper(buffer[i]);
++    }
++
++    
++
++
++/*
++     if (!fork()){
++        nBytes = 1;
++        while(nBytes!=0){
++            nBytes = recv(conn_s,buffer,nBytes,0);
++
++
++            for (i=0;i<nBytes-1;i++){
++                buffer[i] = toupper(buffer[i]);
++            }
++
++            send(conn_s,buffer,nBytes,0);
++        }
++        close (conn_s);
++        exit(0);
++    }
++*/   
++
++ Writeline(conn_s, buffer, strlen(buffer));
+ 
+ 
+ 	/*  Close the connected socket  */
+
+commit a110315be7ed1d06855539303eb13afc0082db42
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Tue Jan 31 20:31:22 2017 -0500
+
+    Client: The client asks for the string, sends it to server and returns string in uppercase
+
+diff --git a/Client /client b/Client /client
+index 4853186..93d14ad 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index c63bfe3..7713565 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -100,18 +100,14 @@ int main(int argc, char *argv[]) {
+     {
+         printf("\nEnter the string to capitalize:\n");
+         fgets(buffer,MAX_LINE,stdin);
+-        printf("\nYou typed: %s",buffer);
++    }
+        
+ 
+ 
+     //strcpy(name, )
+-        nBytes = strlen(buffer) + 1;
+-
+-        send(conn_s,buffer,nBytes,0);
+-
+-        recv(conn_s,buffer,MAX_LINE,0);
++    
+ 
+-    }
++    
+     
+ 
+     /*  Send string to echo server, and retrieve response  */
+@@ -123,7 +119,7 @@ int main(int argc, char *argv[]) {
+ 
+     /*  Output echoed string  */
+ 
+-    //printf("Echo response: %s\n", buffer);
++    printf("\nThe string in Uppercase: %s\n", buffer);
+ 
+     return EXIT_SUCCESS;
+ }
+
+commit afffed4a3c717113fbf73d63a9f15b9e31b0abb6
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Tue Jan 31 18:50:54 2017 -0500
+
+    Client: Asks user to input the string and sends it to the server
+
+diff --git a/Server /server.c b/Server /server.c
+index 93f2d6d..bea62e2 100644
+--- a/Server /server.c	
++++ b/Server /server.c	
+@@ -18,6 +18,7 @@
+ 
+ #include "helper.h"           /*  our own helper functions  */
+ 
++
+ #include <stdlib.h>
+ #include <stdio.h>
+ 
+@@ -97,13 +98,14 @@ int main(int argc, char *argv[]) {
+ 	if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 ) {
+ 	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
+ 	    exit(EXIT_FAILURE);
+-	}
++	} 
+ 
+ 
+ 	/*  Retrieve an input line from the connected socket
+ 	    then simply write it back to the same socket.     */
+ 
+ 	Readline(conn_s, buffer, MAX_LINE-1);
++
+ 	Writeline(conn_s, buffer, strlen(buffer));
+ 
+ 
+
+commit c5034d831c71a893538a8202a925c4f13c3c88f3
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Tue Jan 31 18:49:45 2017 -0500
+
+    Client: Asks to input the string and sends it to the server
+
+diff --git a/Client /client b/Client /client
+index d750804..4853186 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index c81def2..c63bfe3 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -35,6 +35,7 @@ int ParseCmdLine(int argc, char *argv[], char **szAddress, char **szPort);
+ int main(int argc, char *argv[]) {
+ 
+     int       conn_s;                /*  connection socket         */
++    int       nBytes;
+     short int port;                  /*  port number               */
+     struct    sockaddr_in servaddr;  /*  socket address structure  */
+     char      buffer[MAX_LINE];      /*  character buffer          */
+@@ -91,11 +92,26 @@ int main(int argc, char *argv[]) {
+ 
+     printf("Enter the command: ");
+     fgets(buffer, MAX_LINE, stdin);
++
++    //char name[100];
+     
+     int temp = strncmp(buffer, "s", 1);
+     if (temp == 0)
+-        printf("Enter the string to capitalize:\n");
++    {
++        printf("\nEnter the string to capitalize:\n");
++        fgets(buffer,MAX_LINE,stdin);
++        printf("\nYou typed: %s",buffer);
++       
++
++
++    //strcpy(name, )
++        nBytes = strlen(buffer) + 1;
+ 
++        send(conn_s,buffer,nBytes,0);
++
++        recv(conn_s,buffer,MAX_LINE,0);
++
++    }
+     
+ 
+     /*  Send string to echo server, and retrieve response  */
+@@ -107,7 +123,7 @@ int main(int argc, char *argv[]) {
+ 
+     /*  Output echoed string  */
+ 
+-    printf("Echo response: %s\n", buffer);
++    //printf("Echo response: %s\n", buffer);
+ 
+     return EXIT_SUCCESS;
+ }
+
+commit 7c1c656395bfee13798b6221f217f65c2f2ac605
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Tue Jan 31 17:08:14 2017 -0500
+
+    Client: added condition when entered s asks for the string input
+
+diff --git a/Client /client b/Client /client
+index 6647129..d750804 100755
+Binary files a/Client /client and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+index b77722c..c81def2 100644
+--- a/Client /client.c	
++++ b/Client /client.c	
+@@ -89,13 +89,19 @@ int main(int argc, char *argv[]) {
+ 
+     /*  Get string to echo from user  */
+ 
+-    printf("Enter the string to echo: ");
++    printf("Enter the command: ");
+     fgets(buffer, MAX_LINE, stdin);
+     
++    int temp = strncmp(buffer, "s", 1);
++    if (temp == 0)
++        printf("Enter the string to capitalize:\n");
++
++    
+ 
+     /*  Send string to echo server, and retrieve response  */
+ 
+     Writeline(conn_s, buffer, strlen(buffer));
++   
+     Readline(conn_s, buffer, MAX_LINE-1);
+ 
+ 
+
+commit 3e1a028ce0685051675e8a3138f897a74ec70270
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Tue Jan 31 12:56:10 2017 -0500
+
+    Client gets error calling connect
+
+diff --git a/Client /a.out b/Client /a.out
+new file mode 100755
+index 0000000..41da498
+Binary files /dev/null and b/Client /a.out differ
+diff --git a/Client /client b/Client /client
+new file mode 100755
+index 0000000..6647129
+Binary files /dev/null and b/Client /client differ
+diff --git a/Client /client.c b/Client /client.c
+new file mode 100644
+index 0000000..b77722c
+--- /dev/null
++++ b/Client /client.c	
+@@ -0,0 +1,130 @@
++/*
++
++  ECHOCLNT.C
++  ==========
++  (c) Paul Griffiths, 1999
++  Email: mail@paulgriffiths.net
++  
++  Simple TCP/IP echo client.
++
++*/
++
++
++#include <sys/socket.h>       /*  socket definitions        */
++#include <sys/types.h>        /*  socket types              */
++#include <arpa/inet.h>        /*  inet (3) funtions         */
++#include <unistd.h>           /*  misc. UNIX functions      */
++#include "helper.h"           /*  Our own helper functions  */
++#include <stdlib.h>
++#include <string.h>
++#include <stdio.h>
++
++
++/*  Global constants  */
++
++#define MAX_LINE           (1000)
++
++
++/*  Function declarations  */
++
++int ParseCmdLine(int argc, char *argv[], char **szAddress, char **szPort);
++
++
++/*  main()  */
++
++int main(int argc, char *argv[]) {
++
++    int       conn_s;                /*  connection socket         */
++    short int port;                  /*  port number               */
++    struct    sockaddr_in servaddr;  /*  socket address structure  */
++    char      buffer[MAX_LINE];      /*  character buffer          */
++    char     *szAddress; //(char*) malloc(4*sizeof(char));             /*  Holds remote IP address   */
++    char     *szPort; // (char*) malloc(4*sizeof(char));                /*  Holds remote port         */
++    char     *endptr;                /*  for strtol()              */
++
++    /*  Get command line arguments  */
++
++    ParseCmdLine(argc, argv, &szAddress, &szPort);
++
++
++    /*  Set the remote port  */
++    port = strtol(szPort, &endptr, 0);
++    if ( *endptr ) {
++	printf("ECHOCLNT: Invalid port supplied.\n");
++	exit(EXIT_FAILURE);
++    }
++	
++
++    /*  Create the listening socket  */
++
++    if ( (conn_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
++	fprintf(stderr, "ECHOCLNT: Error creating listening socket.\n");
++	exit(EXIT_FAILURE);
++    }
++
++
++    /*  Set all bytes in socket address structure to
++        zero, and fill in the relevant data members   */
++
++    memset(&servaddr, 0, sizeof(servaddr));
++    servaddr.sin_family      = AF_INET;
++    servaddr.sin_port        = htons(port);
++
++
++    /*  Set the remote IP address  */
++
++    if ( inet_aton(szAddress, &servaddr.sin_addr) <= 0 ) {
++	printf("ECHOCLNT: Invalid remote IP address.\n");
++	exit(EXIT_FAILURE);
++    }
++
++    
++    /*  connect() to the remote echo server  */
++
++    if ( connect(conn_s, (struct sockaddr *) &servaddr, sizeof(servaddr) ) < 0 ) {
++	printf("ECHOCLNT: Error calling connect()\n");
++	exit(EXIT_FAILURE);
++    }
++
++
++    /*  Get string to echo from user  */
++
++    printf("Enter the string to echo: ");
++    fgets(buffer, MAX_LINE, stdin);
++    
++
++    /*  Send string to echo server, and retrieve response  */
++
++    Writeline(conn_s, buffer, strlen(buffer));
++    Readline(conn_s, buffer, MAX_LINE-1);
++
++
++    /*  Output echoed string  */
++
++    printf("Echo response: %s\n", buffer);
++
++    return EXIT_SUCCESS;
++}
++
++
++int ParseCmdLine(int argc, char *argv[], char **szAddress, char **szPort) {
++
++    int n = 1;
++
++    while ( n < argc ) {
++	if ( !strncmp(argv[n], "-a", 2) || !strncmp(argv[n], "-A", 2) ) {
++	    *szAddress = argv[++n];
++	}
++	else if ( !strncmp(argv[n], "-p", 2) || !strncmp(argv[n], "-P", 2) ) {
++	    *szPort = argv[++n];
++	}
++	else if ( !strncmp(argv[n], "-h", 2) || !strncmp(argv[n], "-H", 2) ) {
++	    printf("Usage:\n\n");
++	    printf("    timeclnt -a (remote IP) -p (remote port)\n\n");
++	    exit(EXIT_SUCCESS);
++	}
++	++n;
++    }
++
++    return 0;
++}
+diff --git a/Client /helper.h b/Client /helper.h
+new file mode 100644
+index 0000000..7294f94
+--- /dev/null
++++ b/Client /helper.h	
+@@ -0,0 +1,115 @@
++
++
++/*
++
++  HELPER.H
++  ========
++  (c) Paul Griffiths, 1999
++  Email: mail@paulgriffiths.net
++
++  Interface to socket helper functions. 
++
++  Many of these functions are adapted from, inspired by, or 
++  otherwise shamelessly plagiarised from "Unix Network 
++  Programming", W Richard Stevens (Prentice Hall).
++
++*/
++
++
++#ifndef PG_SOCK_HELP
++#define PG_SOCK_HELP
++
++
++#include <unistd.h>             /*  for ssize_t data type  */
++
++#define LISTENQ        (1024)   /*  Backlog for listen()   */
++
++
++/*  Function declarations  */
++
++ssize_t Readline(int fd, void *vptr, size_t maxlen);
++ssize_t Writeline(int fc, const void *vptr, size_t maxlen);
++
++
++
++
++/*
++
++  HELPER.C
++  ========
++  (c) Paul Griffiths, 1999
++  Email: mail@paulgriffiths.net
++
++  Implementation of sockets helper functions.
++
++  Many of these functions are adapted from, inspired by, or 
++  otherwise shamelessly plagiarised from "Unix Network 
++  Programming", W Richard Stevens (Prentice Hall).
++
++*/
++
++#include "helper.h"
++#include <sys/socket.h>
++#include <unistd.h>
++#include <errno.h>
++
++
++/*  Read a line from a socket  */
++
++ssize_t Readline(int sockd, void *vptr, size_t maxlen) {
++    ssize_t n, rc;
++    char    c, *buffer;
++
++    buffer = vptr;
++
++    for ( n = 1; n < maxlen; n++ ) {
++	
++	if ( (rc = read(sockd, &c, 1)) == 1 ) {
++	    *buffer++ = c;
++	    if ( c == '\n' )
++		break;
++	}
++	else if ( rc == 0 ) {
++	    if ( n == 1 )
++		return 0;
++	    else
++		break;
++	}
++	else {
++	    if ( errno == EINTR )
++		continue;
++	    return -1;
++	}
++    }
++
++    *buffer = 0;
++    return n;
++}
++
++
++/*  Write a line to a socket  */
++
++ssize_t Writeline(int sockd, const void *vptr, size_t n) {
++    size_t      nleft;
++    ssize_t     nwritten;
++    const char *buffer;
++
++    buffer = vptr;
++    nleft  = n;
++
++    while ( nleft > 0 ) {
++	if ( (nwritten = write(sockd, buffer, nleft)) <= 0 ) {
++	    if ( errno == EINTR )
++		nwritten = 0;
++	    else
++		return -1;
++	}
++	nleft  -= nwritten;
++	buffer += nwritten;
++    }
++
++    return n;
++}
++
++
++#endif  /*  PG_SOCK_HELP  */
+\ No newline at end of file
+diff --git a/Client /helper.h.gch b/Client /helper.h.gch
+new file mode 100644
+index 0000000..8959c28
+Binary files /dev/null and b/Client /helper.h.gch differ
+
+commit 6448a3c1cc77f7dd9a7324a88d5e9a56e0a37b97
+Author: Utsab Khakurel <utsabab@gmail.com>
+Date:   Tue Jan 31 12:51:31 2017 -0500
+
+    Server is ready to receive
+
+diff --git a/Server /a.out b/Server /a.out
+new file mode 100755
+index 0000000..b6e2809
+Binary files /dev/null and b/Server /a.out differ
+diff --git a/Server /helper.h b/Server /helper.h
+new file mode 100644
+index 0000000..ba42ac6
+--- /dev/null
++++ b/Server /helper.h	
+@@ -0,0 +1,116 @@
++/*
++
++  HELPER.H
++  ========
++  (c) Paul Griffiths, 1999
++  Email: mail@paulgriffiths.net
++
++  Interface to socket helper functions. 
++
++  Many of these functions are adapted from, inspired by, or 
++  otherwise shamelessly plagiarised from "Unix Network 
++  Programming", W Richard Stevens (Prentice Hall).
++
++*/
++
++
++#ifndef PG_SOCK_HELP
++#define PG_SOCK_HELP
++
++#include <string.h>
++#include <unistd.h>             /*  for ssize_t data type  */
++
++#define LISTENQ        (1024)   /*  Backlog for listen()   */
++
++
++/*  Function declarations  */
++
++ssize_t Readline(int fd, void *vptr, size_t maxlen);
++ssize_t Writeline(int fc, const void *vptr, size_t maxlen);
++
++/*
++
++  HELPER.C
++  ========
++  (c) Paul Griffiths, 1999
++  Email: mail@paulgriffiths.net
++
++  Implementation of sockets helper functions.
++
++  Many of these functions are adapted from, inspired by, or 
++  otherwise shamelessly plagiarised from "Unix Network 
++  Programming", W Richard Stevens (Prentice Hall).
++
++*/
++
++#include "helper.h"
++#include <sys/socket.h>
++#include <unistd.h>
++#include <errno.h>
++
++
++/*  Read a line from a socket  */
++
++ssize_t Readline(int sockd, void *vptr, size_t maxlen) {
++    ssize_t n, rc;
++    char    c, *buffer;
++
++    buffer = vptr;
++
++    for ( n = 1; n < maxlen; n++ ) {
++	
++	if ( (rc = read(sockd, &c, 1)) == 1 ) {
++	    *buffer++ = c;
++	    if ( c == '\n' )
++		break;
++	}
++	else if ( rc == 0 ) {
++	    if ( n == 1 )
++		return 0;
++	    else
++		break;
++	}
++	else {
++	    if ( errno == EINTR )
++		continue;
++	    return -1;
++	}
++    }
++
++    *buffer = 0;
++    return n;
++}
++
++
++/*  Write a line to a socket  */
++
++ssize_t Writeline(int sockd, const void *vptr, size_t n) {
++    size_t      nleft;
++    ssize_t     nwritten;
++    const char *buffer;
++
++    buffer = vptr;
++    nleft  = n;
++
++    while ( nleft > 0 ) {
++	if ( (nwritten = write(sockd, buffer, nleft)) <= 0 ) {
++	    if ( errno == EINTR )
++		nwritten = 0;
++	    else
++		return -1;
++	}
++	nleft  -= nwritten;
++	buffer += nwritten;
++    }
++
++    return n;
++}
++
++
++
++
++
++
++
++
++#endif  /*  PG_SOCK_HELP  */
+\ No newline at end of file
+diff --git a/Server /helper.h.gch b/Server /helper.h.gch
+new file mode 100644
+index 0000000..3dbe966
+Binary files /dev/null and b/Server /helper.h.gch differ
+diff --git a/Server /server b/Server /server
+new file mode 100755
+index 0000000..1fd8089
+Binary files /dev/null and b/Server /server differ
+diff --git a/Server /server.c b/Server /server.c
+new file mode 100644
+index 0000000..93f2d6d
+--- /dev/null
++++ b/Server /server.c	
+@@ -0,0 +1,117 @@
++
++/*
++
++  ECHOSERV.C
++  ==========
++  (c) Paul Griffiths, 1999
++  Email: mail@paulgriffiths.net
++  
++  Simple TCP/IP echo server.
++
++*/
++
++
++#include <sys/socket.h>       /*  socket definitions        */
++#include <sys/types.h>        /*  socket types              */
++#include <arpa/inet.h>        /*  inet (3) funtions         */
++#include <unistd.h>           /*  misc. UNIX functions      */
++
++#include "helper.h"           /*  our own helper functions  */
++
++#include <stdlib.h>
++#include <stdio.h>
++
++
++/*  Global constants  */
++
++#define ECHO_PORT          (2002)
++#define MAX_LINE           (1000)
++
++
++int main(int argc, char *argv[]) {
++    int       list_s;                /*  listening socket          */
++    int       conn_s;                /*  connection socket         */
++    short int port;                  /*  port number               */
++    struct    sockaddr_in servaddr;  /*  socket address structure  */
++    char      buffer[MAX_LINE];      /*  character buffer          */
++    char     *endptr;                /*  for strtol()              */
++
++
++    /*  Get port number from the command line, and
++        set to default port if no arguments were supplied  */
++
++    if ( argc == 2 ) {
++	port = strtol(argv[1], &endptr, 0);
++	if ( *endptr ) {
++	    fprintf(stderr, "ECHOSERV: Invalid port number.\n");
++	    exit(EXIT_FAILURE);
++	}
++    }
++    else if ( argc < 2 ) {
++	port = ECHO_PORT;
++    }
++    else {
++	fprintf(stderr, "ECHOSERV: Invalid arguments.\n");
++	exit(EXIT_FAILURE);
++    }
++
++	
++    /*  Create the listening socket  */
++
++    if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
++	fprintf(stderr, "ECHOSERV: Error creating listening socket.\n");
++	exit(EXIT_FAILURE);
++    }
++
++
++    /*  Set all bytes in socket address structure to
++        zero, and fill in the relevant data members   */
++
++    memset(&servaddr, 0, sizeof(servaddr));
++    servaddr.sin_family      = AF_INET;
++    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
++    servaddr.sin_port        = htons(port);
++
++
++    /*  Bind our socket addresss to the 
++	listening socket, and call listen()  */
++
++    if ( bind(list_s, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0 ) {
++	fprintf(stderr, "ECHOSERV: Error calling bind()\n");
++	exit(EXIT_FAILURE);
++    }
++
++    if ( listen(list_s, LISTENQ) < 0 ) {
++	fprintf(stderr, "ECHOSERV: Error calling listen()\n");
++	exit(EXIT_FAILURE);
++    }
++
++    
++    /*  Enter an infinite loop to respond
++        to client requests and echo input  */
++
++    while ( 1 ) {
++
++	/*  Wait for a connection, then accept() it  */
++
++	if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 ) {
++	    fprintf(stderr, "ECHOSERV: Error calling accept()\n");
++	    exit(EXIT_FAILURE);
++	}
++
++
++	/*  Retrieve an input line from the connected socket
++	    then simply write it back to the same socket.     */
++
++	Readline(conn_s, buffer, MAX_LINE-1);
++	Writeline(conn_s, buffer, strlen(buffer));
++
++
++	/*  Close the connected socket  */
++
++	if ( close(conn_s) < 0 ) {
++	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
++	    exit(EXIT_FAILURE);
++	}
++    }
++}
+\ No newline at end of file
+
+commit ce7f543d615ab9146cd4a71bbf4b500b35d3bafd
+Author: Utsab Khakurel <utsab.khakurel@bison.howard.edu>
+Date:   Mon Jan 30 20:28:25 2017 -0500
+
+    Initial commit
+
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..3bd2904
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1 @@
++# Socket-Programming-
+\ No newline at end of file
