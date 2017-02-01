@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     char      buffer_send[MAX_LINE];
     char      capital_buffer[MAX_LINE];
     char      file_buffer[MAX_LINE];
-    file      *final_file;
+    FILE      *final_file;
     long      lSize;
     size_t    result;
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
             rewind (final_file);
 
             //allocate memory to contain the whole file
-            buffer = (char*) malloc (sizeof(char)*lSize);
+            *buffer = (char*) malloc (sizeof(char)*lSize);
             if (buffer == NULL)
             {
                 fputs ("Memory error", stderr);
@@ -176,10 +176,37 @@ int main(int argc, char *argv[]) {
             }
 
             fclose (final_file);
+
+            sprintf(buffer_send, "%d", lSize);
+            strcat(buffer_send, "\n");
+            strcat(buffer_send, buffer);
+
+
+            
+            write(conn_s, buffer_send, lSize);
+
             free (buffer);
-            write(conn_s, buffer, strlen(buffer));
-            return 0;
-        }  
+        }
+        
+
+            else
+            {
+                strcpy (buffer, "NOT FOUND");
+                sprintf(buffer_send, "%d", strlen(buffer));
+                strcat(buffer_send, "\n");
+                strcat(buffer_send, buffer);
+                write(conn_s, buffer_send, strlen(buffer_send));
+            }
+
+            memset(buffer, 0, (sizeof buffer[0]) * MAX_LINE);
+            memset(buffer_send, 0, (sizeof buffer_send[0]) * MAX_LINE);
+            
+
+
+        }
+
+
+
 
 
 
@@ -211,7 +238,7 @@ int main(int argc, char *argv[]) {
 	    fprintf(stderr, "ECHOSERV: Error calling close()\n");
 	    exit(EXIT_FAILURE);
 	}
-
-    }
-    
 }
+
+
+    
