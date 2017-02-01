@@ -101,20 +101,21 @@ int main(int argc, char *argv[]) {
     if (temp_1 == 0)
     {
         printf("\nEnter the string to capitalize:");
-        fgets(buffer,MAX_LINE,stdin);
+        fgets(buffer, MAX_LINE, stdin);
 
         strcpy(buffer_send, "CAP\n");
         strcat(buffer_send,buffer);
         strcat(buffer_send,"\n");
+        
 
         printf("%s",buffer_send);
 
-
-        Writeline(conn_s, buffer_send, strlen(buffer_send));
+        write(conn_s, buffer_send, strlen(buffer_send));
+        
    
    
-        Readline(conn_s, capital_buffer, MAX_LINE-1);
-        printf("\nThe string in Uppercase: %s\n", capital_buffer);
+        read(conn_s, buffer_send, MAX_LINE-1);
+        printf("The string in Uppercase: %s\n",buffer_send);
        
         
     }
@@ -124,6 +125,13 @@ int main(int argc, char *argv[]) {
     {
         printf("\nEnter the string to find the file:\n");
         fgets(buffer,MAX_LINE,stdin);
+
+        strcpy(buffer_send, "FILE\n");
+        strcat(buffer_send,buffer);
+        strcat(buffer_send, "\n");
+        
+
+        printf("%s",buffer_send);
     } 
 
 
