@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 
 /*  Global constants  */
@@ -31,6 +32,8 @@
 
 int main(int argc, char *argv[]) {
     int       list_s;                /*  listening socket          */
+    int       nBytes;
+    int       i;
     int       conn_s;                /*  connection socket         */
     short int port;                  /*  port number               */
     struct    sockaddr_in servaddr;  /*  socket address structure  */
@@ -100,13 +103,41 @@ int main(int argc, char *argv[]) {
 	    exit(EXIT_FAILURE);
 	} 
 
+   
+
 
 	/*  Retrieve an input line from the connected socket
 	    then simply write it back to the same socket.     */
 
 	Readline(conn_s, buffer, MAX_LINE-1);
 
-	Writeline(conn_s, buffer, strlen(buffer));
+
+    for (i=0;i<strlen(buffer);i++){
+        buffer[i] = toupper(buffer[i]);
+    }
+
+    
+
+
+/*
+     if (!fork()){
+        nBytes = 1;
+        while(nBytes!=0){
+            nBytes = recv(conn_s,buffer,nBytes,0);
+
+
+            for (i=0;i<nBytes-1;i++){
+                buffer[i] = toupper(buffer[i]);
+            }
+
+            send(conn_s,buffer,nBytes,0);
+        }
+        close (conn_s);
+        exit(0);
+    }
+*/   
+
+ Writeline(conn_s, buffer, strlen(buffer));
 
 
 	/*  Close the connected socket  */
